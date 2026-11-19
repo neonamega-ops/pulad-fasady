@@ -426,6 +426,8 @@
 <script>
   // Вебхук Make.com (тот же, что у pulad-praca) — заявки идут в Telegram и таблицу
   var WEBHOOK = 'https://hook.eu1.make.com/sird8hacanezibzzta19y6gynyjqu8lr';
+  // CRM лидов (pulad-crm.duckdns.org): копия каждой заявки; ключ из CRM → Настройки → «Заявки с сайта»
+  var CRM = 'https://pulad-crm.duckdns.org/api/inbound?key=nI6cDYLIdURrXRwZAmk0LQyA';
   var JOB = 'Фасады';
 
   var root = document.documentElement;
@@ -501,6 +503,11 @@
       page: location.href, time: new Date().toLocaleString('pl-PL', {timeZone: 'Europe/Warsaw'})
     });
     if (!WEBHOOK) { fail.hidden = false; btn.disabled = false; return; }
+    // копия в CRM; её сбой не мешает основной отправке
+    if (CRM) fetch(CRM, {method: 'POST', keepalive: true, headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: name, phone: phone, vacancy: JOB, utm_campaign: data.get('campaign'),
+        form: location.hostname + location.pathname, exp: exp, docs: docs, lang: data.get('lang'),
+        utm_source: data.get('source'), ad: data.get('ad')})}).catch(function () {});
     fetch(WEBHOOK, {method: 'POST', body: data})
       .then(function (r) {
         if (!r.ok) throw new Error(r.status);
